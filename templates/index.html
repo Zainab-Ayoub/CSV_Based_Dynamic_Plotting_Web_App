@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Plotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .preview-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .plot-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .plot-img {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">CSV Data Plotter</h1>
+        
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- File upload form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>1. Upload CSV File</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input class="form-control" type="file" name="csv_file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+        </div>
+        
+        {% if columns %}
+        <!-- Data preview -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Data Preview</h5>
+            </div>
+            <div class="card-body">
+                {{ data_preview|safe }}
+            </div>
+        </div>
+        
+        <!-- Plot configuration form -->
+        <div class="card">
+            <div class="card-header">
+                <h5>2. Configure Plot</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('plot') }}">
+                    <input type="hidden" name="filename" value="{{ filename }}">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="x_column" class="form-label">X-Axis Column</label>
+                            <select class="form-select" id="x_column" name="x_column" required>
+                                {% for column in columns %}
+                                    <option value="{{ column }}">{{ column }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="y_column" class="form-label">Y-Axis Column</label>
+                            <select class="form-select" id="y_column" name="y_column" required>
+                                {% for column in columns %}
+                                    <option value="{{ column }}">{{ column }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="plot_type" class="form-label">Plot Type</label>
+                            <select class="form-select" id="plot_type" name="plot_type" required>
+                                <option value="line">Line Plot</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="scatter">Scatter Plot</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">Plot Title (optional)</label>
+                            <input type="text" class="form-control" id="title" name="title">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">Generate Plot</button>
+                    <a href="{{ url_for('reset') }}" class="btn btn-outline-secondary">Reset</a>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Plot display -->
+        {% if plot %}
+        <div class="plot-container mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Generated Plot</h5>
+                </div>
+                <div class="card-body">
+                    <img src="{{ url_for('static', filename=plot) }}" class="plot-img" alt="Generated Plot">
+                    <div class="mt-3">
+                        <a href="{{ url_for('download', plot_filename=plot) }}" class="btn btn-primary">Download Plot</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple column selection preview (optional enhancement)
+        document.addEventListener('DOMContentLoaded', function() {
+            const xSelect = document.getElementById('x_column');
+            const ySelect = document.getElementById('y_column');
+            
+            if (xSelect && ySelect) {
+                // Ensure different columns are selected by default
+                if (xSelect.options.length > 1 && ySelect.options.length > 1) {
+                    ySelect.selectedIndex = 1;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
