@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/hassan/Documents/projects/CSV_Based_Dynamic_Plotting_Web_App/venv"
+VIRTUAL_ENV="/home/hassan/Documents/projects/Assignment_3_Web_Plotting_App(257)/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
